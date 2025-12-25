@@ -166,7 +166,7 @@ pub fn day10(part: i32) {
             // }
             // println!("GCD: {gcd}");
 
-            target_joltage = target_joltage.iter().map(|x| (*x)/gcd).collect();
+            // target_joltage = target_joltage.iter().map(|x| (*x)/gcd).collect();
 
             // Heuristic 1: burn more switches early by using buttons with more switches first
             buttons.sort_by(|a, b| b.len().cmp(&a.len()));
@@ -185,7 +185,7 @@ pub fn day10(part: i32) {
                 0,
                 &buttons_remaining
             );
-            min_operations_sum += min_ops * gcd;
+            min_operations_sum += min_ops;
             let elapsed = now.elapsed();
             println!("Time taken: {:.2?}", elapsed);
         }

@@ -21,10 +21,10 @@ fn main() {
 
     let start = std::time::Instant::now();
     match day {
-        "1.1" => day1::day1(),
-        "1.2" => day1::day1_part2(),
-        "2.1" => day2::day2(1),
-        "2.2" => day2::day2(2),
+        "1.1" => day1::day1(),          // Runs in 274.42µs
+        "1.2" => day1::day1_part2(),    // Runs in 378.33µs
+        "2.1" => day2::day2(1),   // Runs in 7.22ms
+        "2.2" => day2::day2(2),   // Runs in 289.32ms
         "3.1" => day3::day3(1),
         "3.2" => day3::day3(2),
         "4.1" => day4::day4(1),

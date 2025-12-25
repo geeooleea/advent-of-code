@@ -1,41 +1,28 @@
 use std::fs;
 
 fn is_invalid(n: i64) -> bool {
-    let n_as_str = n.to_string();
-    if n_as_str.len() % 2 != 0 {
+    let n_digits = n.ilog10() + 1;
+    if n_digits % 2 != 0 {
         return false;
     } else {
-        // str is a number -> ascii only?
-        let (half1, half2) = n_as_str.split_at(n_as_str.len()/2);
-        return half1 == half2;
+        let exp = (10 as i64).pow(n_digits/2);
+        return n % exp == n / exp;
     }
 }
 
 
 fn is_invalid_multiple_reps(n: i64) -> bool {
     let n_as_str = n.to_string();
+    let n_str_bytes = n_as_str.as_bytes();
     let len = n_as_str.len();
     for i in 1..=(len/2) {
         if len % i == 0 {
-            let number_of_segments = len / i;
-            let mut segments: Vec<String> = vec![String::new(); number_of_segments];
+            let segments = n_str_bytes.chunks(i)
+                .map(|buf| unsafe { str::from_utf8_unchecked(buf) })
+                .collect::<Vec<&str>>();
 
-            let mut str_to_split = n_as_str.clone();
-
-            for j in 0..number_of_segments {
-                let (half1, half2) = str_to_split.split_at(i);
-                segments[j] = half1.to_string();
-                str_to_split = half2.to_string();
-            }
-            let first_segment = segments[0].clone();
-
-            let mut valid = true;
-            for segment in segments {
-                if segment != first_segment {
-                    valid = false;
-                    break;
-                }
-            }
+            let first_segment = segments[0];
+            let valid = segments.iter().all(|x| *x == first_segment);
             if valid {return true;}
         }
     }
@@ -56,23 +43,26 @@ pub fn day2(part: i32) {
 
     for range_str in ranges_str {
         let mut range = range_str.split("-");
-        let left = range.next().expect("Y NO NEXT??").parse::<i64>().unwrap();
-        let right = range.next().expect("Y NO NEXT??").parse::<i64>().unwrap();
+        let left = range.next().unwrap().parse::<i64>().unwrap();
+        let right = range.next().unwrap().parse::<i64>().unwrap();
 
-        for n in left..=right {
-            if part ==1 {
+        if part ==1 {
+            for n in left..=right {
                 if is_invalid(n) {
                     invalid_sum += n;
                 }
-            } else if part == 2 {
+            }
+        } else if part == 2 {
+            for n in left..=right {
+                // Todo: there has to be a way to skip checking many numbers in the range.
                 if is_invalid_multiple_reps(n) {
                     invalid_sum += n;
                 }
-            } else {
-                panic!("There's only two parts to this day \\(”˚☐˚)/")
             }
-            
+        } else {
+            panic!("There's only two parts to this day \\(”˚☐˚)/");
         }
+
     }
     println!("All invalid IDs sum up to: {invalid_sum}")
 }
