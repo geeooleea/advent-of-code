@@ -4,16 +4,13 @@ use std::fs;
 pub fn day1() {
     let file_path = "/Users/giuliacarocari/aoc/input.txt";
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
-
+    let contents = fs::read_to_string(file_path).unwrap();
     let lines = contents.split("\n");
     
     let mut position: i32 = 50;
     let mut num_zeros: i32 = 0;
 
     for line in lines {
-        // println!("{line}");
         let number: String = line.chars().skip(1).collect();
         let steps: i32 = number.parse::<i32>().unwrap();
         if line.starts_with("L") {
@@ -36,8 +33,7 @@ pub fn day1_part2() {
     let file_path = "/Users/giuliacarocari/aoc/input.txt";
     // println!("In file {file_path}");
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
+    let contents = fs::read_to_string(file_path).unwrap();
 
     let lines = contents.split("\n");
 
