@@ -4,16 +4,15 @@ use std::{cmp::{max, min}, fs};
 pub fn day9(part: i32) {
     let file_path = "/Users/giuliacarocari/aoc/inputs/day9.txt";
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
+    let contents = fs::read_to_string(file_path).unwrap();
 
     let lines = contents.split("\n");
 
     let mut points: Vec<(usize, usize)> =  vec![];
     for line in lines {
-        let mut split_line = line.split(",");
-        let x = split_line.next().unwrap().parse::<usize>().unwrap();
-        let y = split_line.next().unwrap().parse::<usize>().unwrap();
+        let mut split_line = line.split(",").map(|x| x.parse::<usize>().unwrap());
+        let x = split_line.next().unwrap();
+        let y = split_line.next().unwrap();
         points.push((x, y));
     }
 
@@ -31,32 +30,12 @@ pub fn day9(part: i32) {
         let max_x= *points.iter().map(|(x, _)| x).max().unwrap();
         let max_y= *points.iter().map(|(_, y)| y).max().unwrap();
 
-        println!("Grid size: {max_x} x {max_y}");
-
         let mut grid: Vec<Vec<bool>> = vec![vec![false; max_x+1 as usize]; max_y+1 as usize];
-
-        let mut vertical_lines : Vec<(usize, (usize, usize))>= vec![];
         let mut horizontal_lines : Vec<(usize, (usize, usize))>= vec![];
-        for i in 0..points.len() - 1 {
-            if points[i].0 == points[i+1].0 {
-                // let (bottom, top) = (min(points[i].1, points[i+1].1), max(points[i].1, points[i+1].1));
-                vertical_lines.push((points[i].0, (points[i].1, points[i+1].1)));
-            } else if points[i].1 == points[i+1].1 {
-                // let (left, right) = (min(points[i].0, points[i+1].0), max(points[i].0, points[i+1].0));
+        for i in 0..points.len() {
+            if points[i].1 == points[(i+1)%(points.len()-1)].1 {
                 horizontal_lines.push((points[i].1, (points[i].0, points[i+1].0)));
-            } else {
-                panic!("Looks like my assumption was wrong...")
             }
-        }
-
-        if points[0].0 == points[points.len()-1].0 {
-            // let (bottom, top) = (min(points[0].1, points[points.len()-1].1), max(points[0].1, points[points.len()-1].1));
-            vertical_lines.push((points[0].0, (points[0].1, points[points.len()-1].1)));
-        } else if points[0].1 == points[points.len()-1].1 {
-            // let (left, right) = (min(points[0].0, points[points.len()-1].0), max(points[0].0, points[points.len()-1].0));
-            horizontal_lines.push((points[0].1, (points[0].0, points[points.len()-1].0)));
-        } else {
-            panic!("Looks like my assumption was wrong...")
         }
 
         horizontal_lines.sort();
@@ -70,6 +49,9 @@ pub fn day9(part: i32) {
         for (y, (x1, x2)) in &horizontal_lines {
             
             let (x_min, x_max) = (*x1.min(x2), *x1.max(x2));
+
+            // TODO: Seems stupid that I have to allocate a whole vec here...
+            // At least it's significantly faster than iterating myself.
             let inverted_slice: Vec<bool> = vec![!grid[*y][x_min]; x_max-x_min];
             let start: usize;
             if grid[*y][x_min] { // Flipping from positive to negative: do not touch this line
@@ -102,7 +84,9 @@ pub fn day9(part: i32) {
                 let x_max = max(points[i].0, points[j].0);
                 let y_min = min(points[i].1, points[j].1);
                 let y_max = max(points[i].1, points[j].1);
-                
+                let area = ((x_max-x_min+1) as i64) * ((y_max-y_min+1) as i64);
+                if area <= max_size { continue; }
+
                 let mut is_valid = true;
 
                 for xp in x_min..x_max+1 {
@@ -115,19 +99,21 @@ pub fn day9(part: i32) {
                         break;
                     }
                 }
-                for yp in y_min..y_max+1 {
-                    if !grid[yp][x_min] {
-                        is_valid = false;
-                        break;
-                    }
-                    if !grid[yp][x_max] {
-                        is_valid = false;
-                        break;
+                if is_valid {
+                    for yp in y_min..y_max+1 {
+                        if !grid[yp][x_min] {
+                            is_valid = false;
+                            break;
+                        }
+                        if !grid[yp][x_max] {
+                            is_valid = false;
+                            break;
+                        }
                     }
                 }
 
                 if is_valid {
-                    max_size = max(max_size, ((x_max-x_min+1) as i64) * ((y_max-y_min+1) as i64));
+                    max_size = area;
                 }
             }
         }
